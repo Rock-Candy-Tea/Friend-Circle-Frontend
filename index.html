@@ -288,6 +288,7 @@
           <div class="styled-select">
             <select id="displayTheme">
               <option value="default">默认-default</option>
+              <option value="imm">林木木-imm</option>
             </select>
           </div>
         </div>
@@ -303,7 +304,7 @@
       </div>
     </div>
     
-    <div id="friend-circle-lite-root">
+    <div id="friend-circle-container">
       <div class="placeholder-content">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -322,12 +323,12 @@
       const baseCDN = '';  // 'https://fastly.jsdelivr.net/gh/Rock-Candy-Tea/Friend-Circle-Frontend';
 
       // 清除旧内容和旧脚本
-      document.getElementById('friend-circle-lite-root').innerHTML = '';
+      document.getElementById('friend-circle-container').innerHTML = '';
       document.querySelectorAll('[data-fcircle]').forEach(el => el.remove());
 
       // 设置 UserConfig
       window.UserConfig = {
-        private_api_url: 'https://flink.cancin.cn',
+        private_api_url: 'https://flink.cancin.cn/',
         page_turning_number: 24,
         error_img: 'https://i.p-i.vip/30/20240815-66bced9226a36.webp',
       };
@@ -346,7 +347,7 @@
       document.body.appendChild(js);
       
       // 添加加载动画
-      const root = document.getElementById('friend-circle-lite-root');
+      const root = document.getElementById('friend-circle-container');
       root.innerHTML = `
         <div style="display: flex; justify-content: center; align-items: center; height: 400px;">
           <div class="spinner" style="width: 60px; height: 60px; border: 5px solid #f3f3f3; border-top: 5px solid ${getComputedStyle(document.documentElement).getPropertyValue('--primary-color')}; border-radius: 50%; animation: spin 1s linear infinite;"></div>

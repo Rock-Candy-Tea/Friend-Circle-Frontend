@@ -8,7 +8,7 @@ function initialize_fc_lite() {
         error_img: UserConfig?.error_img || "https://fastly.jsdelivr.net/gh/Rock-Candy-Tea/Friend-Circle-Frontend/logo.png" // 默认头像
     };
 
-    const root = document.getElementById('friend-circle-lite-root');
+    const root = document.getElementById('friend-circle-container');
     
     if (!root) return; // 确保根元素存在
 
@@ -38,8 +38,8 @@ function initialize_fc_lite() {
     let allArticles = []; // 存储所有文章
 
     function loadMoreArticles() {
-        const cacheKey = 'friend-circle-lite-cache';
-        const cacheTimeKey = 'friend-circle-lite-cache-time';
+        const cacheKey = 'friend-circle-cache';
+        const cacheTimeKey = 'friend-circle-cache-time';
         const cacheTime = localStorage.getItem(cacheTimeKey);
         const now = new Date().getTime();
 

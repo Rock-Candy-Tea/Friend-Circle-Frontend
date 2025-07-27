@@ -17,7 +17,7 @@
 在你的网页或 Hexo 页面中插入以下代码片段：
 
 ```html
-<div id="friend-circle-lite-root"></div>
+<div id="friend-circle-container">与主机通讯中……</div>
 
 <script>
     if (typeof UserConfig === 'undefined') {
@@ -29,7 +29,7 @@
             page_turning_number: 24,
 
             // 头像加载失败时的默认图片
-            error_img: 'https://i.p-i.vip/30/20240815-66bced9226a36.webp',
+            error_img: 'https://fastly.jsdelivr.net/gh/Rock-Candy-Tea/Friend-Circle-Frontend/logo.png',
         }
     }
 </script>

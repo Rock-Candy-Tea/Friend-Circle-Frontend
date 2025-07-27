@@ -41,7 +41,7 @@
     --load-more-btn-bg-color: var(--container-bg-color);
 }
 
-#friend-circle-lite-root {
+#friend-circle-container {
     width: 100%;
 }
 
@@ -328,7 +328,7 @@
     transition: box-shadow 0.2s;
 }
 
-#friend-circle-lite-root .card-author img {
+#friend-circle-container .card-author img {
     border-radius: 50%;
     width: 15px;
     height: 15px;
@@ -346,7 +346,7 @@
     align-items: center;
 }
 
-#friend-circle-lite-root .card-bg {
+#friend-circle-container .card-bg {
     cursor: default;
     z-index: 0;
     border-radius: 50% !important;
@@ -360,7 +360,7 @@
     transition: transform 0.6s ease, bottom 0.3s ease, right 0.3s ease;
 }
 
-#friend-circle-lite-root .card:hover .card-bg {
+#friend-circle-container .card:hover .card-bg {
     transform: scale(1.1);
     bottom: -10px;
     right: -8px;
