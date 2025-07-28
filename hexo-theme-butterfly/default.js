@@ -1,18 +1,14 @@
 function initialize_fc_lite() {
-
-    // 用户配置
-    // 设置默认配置
     UserConfig = {
-        private_api_url: UserConfig?.private_api_url || "", 
-        page_turning_number: UserConfig?.page_turning_number || 24, // 默认24篇
-        error_img: UserConfig?.error_img || "https://fastly.jsdelivr.net/gh/Rock-Candy-Tea/Friend-Circle-Frontend/logo.png" // 默认头像
+        private_api_url: UserConfig?.private_api_url || "",
+        page_turning_number: UserConfig?.page_turning_number || 24,
+        error_img: UserConfig?.error_img || "https://fastly.jsdelivr.net/gh/Rock-Candy-Tea/Friend-Circle-Frontend/logo.png"
     };
 
-    const root = document.getElementById('friend-circle-container');
-    
-    if (!root) return; // 确保根元素存在
+    const PUBLIC_API_URL = 'https://fc-example.430070.xyz';
 
-    // 清除之前的内容
+    const root = document.getElementById('friend-circle-container');
+    if (!root) return;
     root.innerHTML = '';
 
     const randomArticleContainer = document.createElement('div');
@@ -23,19 +19,44 @@ function initialize_fc_lite() {
     container.className = 'articles-container';
     container.id = 'articles-container';
     root.appendChild(container);
-    
+
     const loadMoreBtn = document.createElement('button');
     loadMoreBtn.id = 'load-more-btn';
     loadMoreBtn.innerText = '再来亿点';
     root.appendChild(loadMoreBtn);
 
-    // 创建统计信息容器
     const statsContainer = document.createElement('div');
     statsContainer.id = 'stats-container';
     root.appendChild(statsContainer);
 
-    let start = 0; // 记录加载起始位置
-    let allArticles = []; // 存储所有文章
+    let start = 0;
+    let allArticles = [];
+    let globalStats = {};
+
+    function getSortRule() {
+        return localStorage.getItem('friend-circle-sort') || 'created';
+    }
+
+    function setSortRule(rule) {
+        localStorage.setItem('friend-circle-sort', rule);
+    }
+
+    function getDataSource() {
+        return localStorage.getItem('friend-circle-source') || 'private';
+    }
+
+    function setDataSource(source) {
+        localStorage.setItem('friend-circle-source', source);
+    }
+
+    function getApiUrl() {
+        return getDataSource() === 'public' ? PUBLIC_API_URL : UserConfig.private_api_url;
+    }
+
+    function clearCache() {
+        localStorage.removeItem('friend-circle-cache');
+        localStorage.removeItem('friend-circle-cache-time');
+    }
 
     function loadMoreArticles() {
         const cacheKey = 'friend-circle-cache';
@@ -43,7 +64,7 @@ function initialize_fc_lite() {
         const cacheTime = localStorage.getItem(cacheTimeKey);
         const now = new Date().getTime();
 
-        if (cacheTime && (now - cacheTime < 10 * 60 * 1000)) { // 缓存时间小于10分钟
+        if (cacheTime && (now - cacheTime < 10 * 60 * 1000)) {
             const cachedData = JSON.parse(localStorage.getItem(cacheKey));
             if (cachedData) {
                 processArticles(cachedData);
@@ -51,7 +72,10 @@ function initialize_fc_lite() {
             }
         }
 
-        fetch(`${UserConfig.private_api_url.endsWith('/') ? UserConfig.private_api_url + 'all' : UserConfig.private_api_url + '/all'}`)
+        const apiUrl = getApiUrl();
+        const finalUrl = apiUrl.endsWith('/') ? apiUrl + 'all' : apiUrl + '/all';
+
+        fetch(finalUrl)
             .then(response => response.json())
             .then(data => {
                 localStorage.setItem(cacheKey, JSON.stringify(data));
@@ -59,25 +83,27 @@ function initialize_fc_lite() {
                 processArticles(data);
             })
             .finally(() => {
-                loadMoreBtn.innerText = '再来亿点'; // 恢复按钮文本
+                loadMoreBtn.innerText = '再来亿点';
             });
     }
 
     function processArticles(data) {
         allArticles = data.article_data;
-        // 处理统计数据
-        const stats = data.statistical_data;
+        globalStats = data.statistical_data;
+
+        const sortRule = getSortRule();
+        allArticles.sort((a, b) => b[sortRule].localeCompare(a[sortRule]));
+
         statsContainer.innerHTML = `
             <div>Powered by: <a href="https://github.com/Rock-Candy-Tea/hexo-circle-of-friends" target="_blank">Hexo Circle of Friends</a><br></div>
             <div>Designed By: <a href="https://www.liushen.fun/" target="_blank">LiuShen</a><br></div>
-            <div>订阅:${stats.friends_num}   活跃:${stats.active_num}   总文章数:${stats.article_num}<br></div>
-            <div>更新时间:${stats.last_updated_time}</div>
+            <div>订阅:${globalStats.friends_num} 活跃:${globalStats.active_num} 总文章数:${globalStats.article_num}<br></div>
+            <div>更新时间:${globalStats.last_updated_time}</div>
         `;
 
-        displayRandomArticle(); // 显示随机友链卡片
+        displayRandomArticle();
 
         const articles = allArticles.slice(start, start + UserConfig.page_turning_number);
-
         articles.forEach(article => {
             const card = document.createElement('div');
             card.className = 'card';
@@ -85,15 +111,15 @@ function initialize_fc_lite() {
             const title = document.createElement('div');
             title.className = 'card-title';
             title.innerText = article.title;
-            card.appendChild(title);
             title.onclick = () => window.open(article.link, '_blank');
+            card.appendChild(title);
 
             const author = document.createElement('div');
             author.className = 'card-author';
             const authorImg = document.createElement('img');
             authorImg.className = 'no-lightbox';
-            authorImg.src = article.avatar || UserConfig.error_img; // 使用默认头像
-            authorImg.onerror = () => authorImg.src = UserConfig.error_img; // 头像加载失败时使用默认头像
+            authorImg.src = article.avatar || UserConfig.error_img;
+            authorImg.onerror = () => authorImg.src = UserConfig.error_img;
             author.appendChild(authorImg);
             author.appendChild(document.createTextNode(article.author));
             card.appendChild(author);
@@ -110,55 +136,88 @@ function initialize_fc_lite() {
             const bgImg = document.createElement('img');
             bgImg.className = 'card-bg no-lightbox';
             bgImg.src = article.avatar || UserConfig.error_img;
-            bgImg.onerror = () => bgImg.src = UserConfig.error_img; // 头像加载失败时使用默认头像
+            bgImg.onerror = () => bgImg.src = UserConfig.error_img;
             card.appendChild(bgImg);
 
             container.appendChild(card);
         });
 
         start += UserConfig.page_turning_number;
-
         if (start >= allArticles.length) {
-            loadMoreBtn.style.display = 'none'; // 隐藏按钮
+            loadMoreBtn.style.display = 'none';
         }
     }
 
-    // 显示随机文章的逻辑
     function displayRandomArticle() {
         const randomArticle = allArticles[Math.floor(Math.random() * allArticles.length)];
-        randomArticleContainer.innerHTML = `
-            <div class="random-container">
-                <div class="random-container-title">随机钓鱼</div>
-                <div class="random-title">${randomArticle.title}</div>
-                <div class="random-author">作者: ${randomArticle.author}</div>
-            </div>
-            <div class="random-button-container">
-                <a href="#" id="refresh-random-article">刷新</a>
-                <button class="random-link-button" onclick="window.open('${randomArticle.link}', '_blank')">过去转转</button>
+        const sortRule = getSortRule();
+        const sourceRule = getDataSource();
+
+        const statsCard = `
+            <div class="random-stats-card">
+                <div class="random-stats-info">
+                    <span class="stats-item stats-subscribe">订阅: ${globalStats.friends_num}</span>
+                    <span class="stats-item stats-active">活跃: ${globalStats.active_num}</span>
+                    <span class="stats-item stats-articles">文章: ${globalStats.article_num}</span>
+                </div>
+                <div class="random-stats-controls">
+                    <button id="sort-toggle-btn">${sortRule === 'created' ? '发布时间' : '更新时间'}</button>
+                    <button id="source-toggle-btn">${sourceRule === 'private' ? '私有订阅' : '公共订阅'}</button>
+                </div>
             </div>
         `;
 
-        // 为刷新按钮添加事件监听器
-        const refreshBtn = document.getElementById('refresh-random-article');
-        refreshBtn.addEventListener('click', function (event) {
-            event.preventDefault(); // 阻止默认的跳转行为
-            displayRandomArticle(); // 调用显示随机文章的逻辑
+        const randomCard = `
+            <div class="random-container">
+                <div class="random-content-container">
+                    <div class="random-content">
+                        <span class="random-container-title">🎣随机钓鱼: </span>钓到了 <span class="random-author">${randomArticle.author}</span> 的文章: <span class="random-title">${randomArticle.title}</span>
+                    </div>
+                </div>
+                <div class="random-button-container">
+                    <button href="#" id="refresh-random-article">刷新</button>
+                    <button class="random-link-button" onclick="window.open('${randomArticle.link}', '_blank')">看看</button>
+                </div>
+            </div>
+        `;
+
+        randomArticleContainer.innerHTML = statsCard + randomCard;
+
+        document.getElementById('refresh-random-article').addEventListener('click', function (event) {
+            event.preventDefault();
+            displayRandomArticle();
+        });
+
+        document.getElementById('sort-toggle-btn').addEventListener('click', () => {
+            const next = sortRule === 'created' ? 'updated' : 'created';
+            setSortRule(next);
+            start = 0;
+            container.innerHTML = '';
+            processArticles({ article_data: allArticles, statistical_data: globalStats });
+        });
+
+        document.getElementById('source-toggle-btn').addEventListener('click', () => {
+            const next = sourceRule === 'private' ? 'public' : 'private';
+            setDataSource(next);
+            clearCache();
+            start = 0;
+            container.innerHTML = '';
+            loadMoreArticles();
         });
     }
 
     function showAuthorArticles(author, avatar, link) {
-        // 如果不存在，则创建模态框结构
         if (!document.getElementById('fclite-modal')) {
             const modal = document.createElement('div');
             modal.id = 'modal';
             modal.className = 'modal';
             modal.innerHTML = `
-            <div class="modal-content">
-                <img id="modal-author-avatar" src="" alt="">
-                <a id="modal-author-name-link"></a>
-                <div id="modal-articles-container"></div>
-                <img id="modal-bg" src="" alt="">
-            </div>
+                <div class="modal-content">
+                    <img id="modal-author-avatar" src="" alt="">
+                    <a id="modal-author-name-link"></a>
+                    <div id="modal-articles-container"></div>
+                    <img id="modal-bg" src="" alt="">
+                </div>
             `;
             root.appendChild(modal);
         }
@@ -169,16 +228,15 @@ function initialize_fc_lite() {
         const modalAuthorNameLink = document.getElementById('modal-author-name-link');
         const modalBg = document.getElementById('modal-bg');
 
-        modalArticlesContainer.innerHTML = ''; // 清空之前的内容
-        modalAuthorAvatar.src = avatar  || UserConfig.error_img; // 使用默认头像
-        modalAuthorAvatar.onerror = () => modalAuthorAvatar.src = UserConfig.error_img; // 头像加载失败时使用默认头像
-        modalBg.src = avatar || UserConfig.error_img; // 使用默认头像
-        modalBg.onerror = () => modalBg.src = UserConfig.error_img; // 头像加载失败时使用默认头像
+        modalArticlesContainer.innerHTML = '';
+        modalAuthorAvatar.src = avatar || UserConfig.error_img;
+        modalAuthorAvatar.onerror = () => modalAuthorAvatar.src = UserConfig.error_img;
+        modalBg.src = avatar || UserConfig.error_img;
+        modalBg.onerror = () => modalBg.src = UserConfig.error_img;
         modalAuthorNameLink.innerText = author;
         modalAuthorNameLink.href = new URL(link).origin;
 
         const authorArticles = allArticles.filter(article => article.author === author);
-        // 仅仅取前五个，防止文章过多导致模态框过长，如果不够五个则全部取出
         authorArticles.slice(0, 4).forEach(article => {
             const articleDiv = document.createElement('div');
             articleDiv.className = 'modal-article';
@@ -198,14 +256,12 @@ function initialize_fc_lite() {
             modalArticlesContainer.appendChild(articleDiv);
         });
 
-        // 设置类名以触发显示动画
         modal.style.display = 'block';
         setTimeout(() => {
             modal.classList.add('modal-open');
-        }, 10); // 确保显示动画触发
+        }, 10);
     }
 
-    // 隐藏模态框的函数
     function hideModal() {
         const modal = document.getElementById('modal');
         modal.classList.remove('modal-open');
@@ -215,20 +271,13 @@ function initialize_fc_lite() {
         }, { once: true });
     }
 
-    // 初始加载
     loadMoreArticles();
-
-    // 加载更多按钮点击事件
     loadMoreBtn.addEventListener('click', loadMoreArticles);
-
-    // 点击遮罩层关闭模态框
-    window.onclick = function(event) {
+    window.onclick = function (event) {
         const modal = document.getElementById('modal');
-        if (event.target === modal) {
-            hideModal();
-        }
+        if (event.target === modal) hideModal();
     };
-};
+}
 
 function whenDOMReady() {
     initialize_fc_lite();
