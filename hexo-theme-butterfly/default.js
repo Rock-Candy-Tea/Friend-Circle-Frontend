@@ -114,6 +114,9 @@ function initialize_fc_lite() {
             title.onclick = () => window.open(article.link, '_blank');
             card.appendChild(title);
 
+            const authorContainer = document.createElement('div');
+            authorContainer.className = 'author-container';
+            
             const author = document.createElement('div');
             author.className = 'card-author';
             const authorImg = document.createElement('img');
@@ -122,7 +125,130 @@ function initialize_fc_lite() {
             authorImg.onerror = () => authorImg.src = UserConfig.error_img;
             author.appendChild(authorImg);
             author.appendChild(document.createTextNode(article.author));
-            card.appendChild(author);
+            authorContainer.appendChild(author);
+            
+            const summaryIndicator = document.createElement('div');
+            summaryIndicator.className = 'summary-indicator';
+            if (article.summary) {
+                const gptSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M260.4 249.8L260.4 201.2C260.4 197.1 261.9 194 265.5 192L363.3 135.7C376.6 128 392.5 124.4 408.9 124.4C470.3 124.4 509.3 172 509.3 222.7C509.3 226.3 509.3 230.4 508.8 234.5L407.3 175.1C401.2 171.5 395 171.5 388.9 175.1L260.4 249.8zM488.7 439.2L488.7 323C488.7 315.8 485.6 310.7 479.5 307.1L351 232.4L393 208.3C396.6 206.3 399.7 206.3 403.2 208.3L501 264.7C529.2 281.1 548.1 315.9 548.1 349.7C548.1 388.6 525.1 424.5 488.7 439.3L488.7 439.3zM230.2 336.8L188.2 312.2C184.6 310.2 183.1 307.1 183.1 303L183.1 190.4C183.1 135.6 225.1 94.1 281.9 94.1C303.4 94.1 323.4 101.3 340.3 114.1L239.4 172.5C233.3 176.1 230.2 181.2 230.2 188.4L230.2 336.9L230.2 336.9zM320.6 389L260.4 355.2L260.4 283.5L320.6 249.7L380.8 283.5L380.8 355.2L320.6 389zM359.3 544.7C337.8 544.7 317.8 537.5 300.9 524.7L401.8 466.3C407.9 462.7 411 457.6 411 450.4L411 301.9L453.5 326.5C457.1 328.5 458.6 331.6 458.6 335.7L458.6 448.3C458.6 503.1 416.1 544.6 359.3 544.6L359.3 544.6zM237.8 430.5L140.1 374.2C111.9 357.8 93 323 93 289.2C93 249.8 116.6 214.4 152.9 199.6L152.9 316.3C152.9 323.5 156 328.6 162.1 332.2L290.1 406.4L248.1 430.5C244.5 432.5 241.4 432.5 237.9 430.5zM232.2 514.5C174.3 514.5 131.8 471 131.8 417.2C131.8 413.1 132.3 409 132.8 404.9L233.7 463.3C239.8 466.9 246 466.9 252.1 463.3L380.6 389.1L380.6 437.7C380.6 441.8 379.1 444.9 375.5 446.9L277.7 503.2C264.4 510.9 248.5 514.5 232.1 514.5L232.1 514.5zM359.2 575.4C421.2 575.4 472.9 531.4 484.6 473C541.9 458.1 578.8 404.4 578.8 349.6C578.8 313.8 563.4 278.9 535.8 253.9C538.4 243.1 539.9 232.4 539.9 221.6C539.9 148.4 480.5 93.6 411.9 93.6C398.1 93.6 384.8 95.6 371.5 100.3C348.5 77.8 316.7 63.4 281.9 63.4C219.9 63.4 168.2 107.4 156.5 165.8C99.2 180.6 62.3 234.4 62.3 289.2C62.3 325 77.7 359.9 105.3 384.9C102.7 395.7 101.2 406.4 101.2 417.2C101.2 490.4 160.6 545.2 229.2 545.2C243 545.2 256.3 543.2 269.6 538.5C292.6 561 324.4 575.4 359.2 575.4z"/></svg>`;
+                summaryIndicator.innerHTML = gptSvg;
+                authorContainer.appendChild(summaryIndicator);
+
+                let hideTimeout;
+
+                const showPopup = (event) => {
+                    if (!article.summary) return;
+                    
+                    // 清除隐藏定时器
+                    if (hideTimeout) {
+                        clearTimeout(hideTimeout);
+                        hideTimeout = null;
+                    }
+                    
+                    // 如果弹窗已存在，直接返回
+                    if (summaryIndicator._popup) return;
+                    
+                    // 创建弹窗元素
+                    const popup = document.createElement('div');
+                    popup.className = 'summary-popup';
+                    popup.innerHTML = `
+                        <div class="summary-popup-title">${gptSvg}<span>文章摘要</span></div>
+                        <div class="summary-popup-content">${article.summary}</div>
+                    `;
+                    
+                    // 添加到body中，先设置为不可见以便测量
+                    popup.style.visibility = 'hidden';
+                    popup.style.position = 'fixed';
+                    document.body.appendChild(popup);
+                    
+                    // 获取鼠标位置和屏幕尺寸
+                    const mouseX = event.clientX;
+                    const mouseY = event.clientY;
+                    const screenWidth = window.innerWidth;
+                    const screenHeight = window.innerHeight;
+                    
+                    // 计算响应式宽度
+                    const maxWidth = Math.min(400, screenWidth - 40);
+                    popup.style.width = maxWidth + 'px';
+                    
+                    // 获取实际高度
+                    const popupRect = popup.getBoundingClientRect();
+                    const popupWidth = popupRect.width;
+                    const popupHeight = popupRect.height;
+                    
+                    // 计算弹窗位置
+                    let left = mouseX + 10;
+                    let top = mouseY + 10;
+                    
+                    // 检查是否超出右边界，如果是则显示在左侧
+                    if (left + popupWidth > screenWidth) {
+                        left = mouseX - popupWidth - 10;
+                    }
+                    
+                    // 检查是否超出下边界，如果是则显示在上方
+                    if (top + popupHeight > screenHeight) {
+                        top = mouseY - popupHeight - 10;
+                    }
+                    
+                    // 确保不会超出左边界和上边界
+                    left = Math.max(10, left);
+                    top = Math.max(10, top);
+                    
+                    // 设置弹窗最终位置和样式
+                    popup.style.cssText = `
+                        position: fixed;
+                        left: ${left}px;
+                        top: ${top}px;
+                        width: ${maxWidth}px;
+                        z-index: 9999;
+                        visibility: visible;
+                        transform: scale(0.8) translateY(-10px);
+                        opacity: 0;
+                        pointer-events: auto;
+                    `;
+                    
+                    // 添加动画效果
+                    requestAnimationFrame(() => {
+                        popup.style.transform = 'scale(1) translateY(0)';
+                        popup.style.opacity = '1';
+                    });
+                    
+                    // 存储弹窗引用
+                    summaryIndicator._popup = popup;
+                    
+                    // 为弹窗添加鼠标事件
+                    popup.addEventListener('mouseenter', () => {
+                        if (hideTimeout) {
+                            clearTimeout(hideTimeout);
+                            hideTimeout = null;
+                        }
+                    });
+                    
+                    popup.addEventListener('mouseleave', hidePopup);
+                };
+
+                const hidePopup = () => {
+                    hideTimeout = setTimeout(() => {
+                        const popup = summaryIndicator._popup;
+                        if (popup) {
+                            popup.style.transform = 'scale(0.8) translateY(-10px)';
+                            popup.style.opacity = '0';
+                            
+                            setTimeout(() => {
+                                if (popup.parentNode) {
+                                    document.body.removeChild(popup);
+                                }
+                                summaryIndicator._popup = null;
+                            }, 300);
+                        }
+                        hideTimeout = null;
+                    }, 100); // 100ms延迟，给鼠标移动到弹窗的时间
+                };
+
+                summaryIndicator.addEventListener('mouseenter', showPopup);
+                summaryIndicator.addEventListener('mouseleave', hidePopup);
+            }
+            card.appendChild(authorContainer);
 
             author.onclick = () => {
                 showAuthorArticles(article.author, article.avatar, article.link);
@@ -207,7 +333,7 @@ function initialize_fc_lite() {
     }
 
     function showAuthorArticles(author, avatar, link) {
-        if (!document.getElementById('fclite-modal')) {
+        if (!document.getElementById('modal')) {
             const modal = document.createElement('div');
             modal.id = 'modal';
             modal.className = 'modal';
