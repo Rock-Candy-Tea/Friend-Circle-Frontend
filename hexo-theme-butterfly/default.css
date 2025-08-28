@@ -397,6 +397,7 @@
 
 .author-container {
     display: flex;
+    z-index: 1;
     align-items: center;
 }
 
@@ -418,7 +419,6 @@
 
 .summary-popup {
     position: fixed;
-    padding: 15px;
     opacity: 0;
     transition: all .3s ease-in-out;
     background-color: var(--container-bg-color);
@@ -427,33 +427,53 @@
     max-width: 500px;
     z-index: 9999;
     border-radius: 10px;
+    overflow: hidden;
 }
 
 .summary-popup-title {
     display: flex;
+    justify-content: space-between;
+    background-color: var(--background-color);
     align-items: center;
     font-size: 16px;
     font-weight: 800;
     color: var(--hover-color);
-    border-bottom: 1px dashed var(--hover-color);
-    margin-bottom: 10px;
-    padding-bottom: 5px;
+    border-bottom: 1px solid var(--border-color);
+    padding: 5px 15px;
 }
 
-.summary-popup-title svg {
+.summary-popup-updated-at,
+.summary-popup-title .summary-model {
+    color: var(--text-color);
+    font-size: 12px;
+    font-weight: 300;
+}
+
+.summary-popup-title span svg {
     fill: var(--hover-color);
-    height: 20px;
+    height: 30px;
     width: 20px;
     margin-right: 5px;
 }
 
 .summary-popup-title span {
-    margin-bottom: 2px;
+    display: flex;
+    line-height: 30px;
+    align-items: center;
 }
 
 .summary-popup-content {
     font-size: 14px;
+    max-height: 300px;
+    overflow-y: auto;
     line-height: 1.5;
+    padding: 10px 15px;
+}
+
+.summary-popup-updated-at {
+    padding: 5px 15px;
+    background: var(--background-color);
+    border-top: 1px solid var(--border-color);
 }
 
 .card-author {

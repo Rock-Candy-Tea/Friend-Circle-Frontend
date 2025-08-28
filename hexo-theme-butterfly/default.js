@@ -137,8 +137,6 @@ function initialize_fc_lite() {
                 let hideTimeout;
 
                 const showPopup = (event) => {
-                    if (!article.summary) return;
-                    
                     // 清除隐藏定时器
                     if (hideTimeout) {
                         clearTimeout(hideTimeout);
@@ -146,14 +144,20 @@ function initialize_fc_lite() {
                     }
                     
                     // 如果弹窗已存在，直接返回
-                    if (summaryIndicator._popup) return;
+                    if (summaryIndicator._popup) {
+                        // 删掉弹窗
+                        summaryIndicator.removeChild(summaryIndicator._popup);
+                        summaryIndicator._popup = null;
+                    }
                     
                     // 创建弹窗元素
                     const popup = document.createElement('div');
+                    const model = article.ai_model.split('/').pop();
                     popup.className = 'summary-popup';
                     popup.innerHTML = `
-                        <div class="summary-popup-title">${gptSvg}<span>文章摘要</span></div>
+                        <div class="summary-popup-title"><span>${gptSvg}文章摘要</span><div class="summary-model">${model}</div></div>
                         <div class="summary-popup-content">${article.summary}</div>
+                        <div class="summary-popup-updated-at">Update at: <span>${new Date(article.summary_updated_at).toLocaleDateString('zh-CN', {month: '2-digit', day: '2-digit'}).replace(/\//g, '-')} ${new Date(article.summary_updated_at).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit', hour12: false})}</span></div>
                     `;
                     
                     // 添加到body中，先设置为不可见以便测量
@@ -242,7 +246,7 @@ function initialize_fc_lite() {
                             }, 300);
                         }
                         hideTimeout = null;
-                    }, 100); // 100ms延迟，给鼠标移动到弹窗的时间
+                    }, 30); // 100ms延迟，给鼠标移动到弹窗的时间
                 };
 
                 summaryIndicator.addEventListener('mouseenter', showPopup);
