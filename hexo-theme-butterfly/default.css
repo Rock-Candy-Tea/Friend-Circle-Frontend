@@ -472,8 +472,7 @@
 
 .summary-popup-updated-at {
     padding: 5px 15px;
-    background: var(--background-color);
-    border-top: 1px solid var(--border-color);
+    text-align: right;
 }
 
 .card-author {

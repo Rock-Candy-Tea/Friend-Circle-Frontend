@@ -157,7 +157,7 @@ function initialize_fc_lite() {
                     popup.innerHTML = `
                         <div class="summary-popup-title"><span>${gptSvg}文章摘要</span><div class="summary-model">${model}</div></div>
                         <div class="summary-popup-content">${article.summary}</div>
-                        <div class="summary-popup-updated-at">Update at: <span>${new Date(article.summary_updated_at).toLocaleDateString('zh-CN', {month: '2-digit', day: '2-digit'}).replace(/\//g, '-')} ${new Date(article.summary_updated_at).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit', hour12: false})}</span></div>
+                        <div class="summary-popup-updated-at">🕙Update at: <span>${new Date(article.summary_updated_at).toLocaleDateString('zh-CN', {month: '2-digit', day: '2-digit'}).replace(/\//g, '-')} ${new Date(article.summary_updated_at).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit', hour12: false})}</span></div>
                     `;
                     
                     // 添加到body中，先设置为不可见以便测量
