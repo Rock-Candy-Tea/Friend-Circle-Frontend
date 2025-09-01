@@ -11,9 +11,9 @@ function initialize_fc_lite() {
     if (!root) return;
     root.innerHTML = '';
 
-    const randomArticleContainer = document.createElement('div');
-    randomArticleContainer.id = 'random-article';
-    root.appendChild(randomArticleContainer);
+    const TopContainer = document.createElement('div');
+    TopContainer.id = 'top-fc-container';
+    root.appendChild(TopContainer);
 
     const container = document.createElement('div');
     container.className = 'articles-container';
@@ -94,14 +94,9 @@ function initialize_fc_lite() {
         const sortRule = getSortRule();
         allArticles.sort((a, b) => b[sortRule].localeCompare(a[sortRule]));
 
-        statsContainer.innerHTML = `
-            <div>Powered by: <a href="https://github.com/Rock-Candy-Tea/hexo-circle-of-friends" target="_blank">Hexo Circle of Friends</a><br></div>
-            <div>Designed By: <a href="https://www.liushen.fun/" target="_blank">LiuShen</a><br></div>
-            <div>订阅:${globalStats.friends_num} 活跃:${globalStats.active_num} 总文章数:${globalStats.article_num}<br></div>
-            <div>更新时间:${globalStats.last_updated_time}</div>
-        `;
+        statsContainer.innerHTML = `<div>Powered by: <a href="https://github.com/Rock-Candy-Tea/hexo-circle-of-friends" target="_blank">Hexo Circle of Friends</a><br></div><div>Designed By: <a href="https://www.liushen.fun/" target="_blank">LiuShen</a><br></div><div>更新时间: ${globalStats.last_updated_time}</div>`;
 
-        displayRandomArticle();
+        initializeTopSection();
 
         const articles = allArticles.slice(start, start + UserConfig.page_turning_number);
         articles.forEach(article => {
@@ -155,10 +150,7 @@ function initialize_fc_lite() {
                     const model = article.ai_model.split('/').pop();
                     popup.className = 'summary-popup';
                     popup.innerHTML = `
-                        <div class="summary-popup-title"><span>${gptSvg}文章摘要</span><div class="summary-model">${model}</div></div>
-                        <div class="summary-popup-content">${article.summary}</div>
-                        <div class="summary-popup-updated-at">🕙Update at: <span>${new Date(article.summary_updated_at).toLocaleDateString('zh-CN', {month: '2-digit', day: '2-digit'}).replace(/\//g, '-')} ${new Date(article.summary_updated_at).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit', hour12: false})}</span></div>
-                    `;
+                        <div class="summary-popup-title"><span>${gptSvg}文章摘要</span><div class="summary-model">${model}</div></div><div class="summary-popup-content">${article.summary}</div><div class="summary-popup-updated-at">🕙Update at: <span>${new Date(article.summary_updated_at).toLocaleDateString('zh-CN', {month: '2-digit', day: '2-digit'}).replace(/\//g, '-')} ${new Date(article.summary_updated_at).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit', hour12: false})}</span></div>`;
                     
                     // 添加到body中，先设置为不可见以便测量
                     popup.style.visibility = 'hidden';
@@ -199,17 +191,7 @@ function initialize_fc_lite() {
                     top = Math.max(10, top);
                     
                     // 设置弹窗最终位置和样式
-                    popup.style.cssText = `
-                        position: fixed;
-                        left: ${left}px;
-                        top: ${top}px;
-                        width: ${maxWidth}px;
-                        z-index: 9999;
-                        visibility: visible;
-                        transform: scale(0.8) translateY(-10px);
-                        opacity: 0;
-                        pointer-events: auto;
-                    `;
+                    popup.style.cssText = `left: ${left}px;top: ${top}px;width: ${maxWidth}px;visibility: visible;transform: scale(0.8) translateY(-10px);opacity: 0;`;
                     
                     // 添加动画效果
                     requestAnimationFrame(() => {
@@ -278,44 +260,21 @@ function initialize_fc_lite() {
         }
     }
 
-    function displayRandomArticle() {
-        const randomArticle = allArticles[Math.floor(Math.random() * allArticles.length)];
+    // 初始化统计卡片和随机文章结构
+    function initializeTopSection() {
         const sortRule = getSortRule();
         const sourceRule = getDataSource();
 
-        const statsCard = `
-            <div class="random-stats-card">
-                <div class="random-stats-info">
-                    <span class="stats-item stats-subscribe">订阅: ${globalStats.friends_num}</span>
-                    <span class="stats-item stats-active">活跃: ${globalStats.active_num}</span>
-                    <span class="stats-item stats-articles">文章: ${globalStats.article_num}</span>
-                </div>
-                <div class="random-stats-controls">
-                    <button id="sort-toggle-btn">${sortRule === 'created' ? '发布时间' : '更新时间'}</button>
-                    <button id="source-toggle-btn">${sourceRule === 'private' ? '私有订阅' : '公共订阅'}</button>
-                </div>
-            </div>
-        `;
+        const statsCard = `<div class="stats-card-container"><div class="stats-card-left"><div class="stats-item"><div class="stats-value">${globalStats.friends_num}</div><div class="stats-label">订阅</div></div><div class="stats-item"><div class="stats-value">${globalStats.active_num}</div><div class="stats-label">活跃</div></div><div class="stats-item"><div class="stats-value">${globalStats.article_num}</div><div class="stats-label">文章</div></div></div><div class="stats-card-right"><div class="stats-controls"><button id="sort-toggle-btn">${sortRule==='created'?'发布时间':'更新时间'}</button><button id="source-toggle-btn">${sourceRule==='private'?'私有订阅':'公共订阅'}</button></div><div class="stats-version"><span id="version-text">加载中</span><span id="version-info">正在与主机通讯中</span></div></div></div>`;
 
-        const randomCard = `
-            <div class="random-container">
-                <div class="random-content-container">
-                    <div class="random-content">
-                        <span class="random-container-title">🎣随机钓鱼: </span>钓到了 <span class="random-author">${randomArticle.author}</span> 的文章: <span class="random-title">${randomArticle.title}</span>
-                    </div>
-                </div>
-                <div class="random-button-container">
-                    <button href="#" id="refresh-random-article">刷新</button>
-                    <button class="random-link-button" onclick="window.open('${randomArticle.link}', '_blank')">看看</button>
-                </div>
-            </div>
-        `;
+        const randomCard = `<div class="random-container"><div class="random-content-container"><div class="random-content"><span class="random-container-title">🎣随机钓鱼:</span>钓到了<span class="random-author"id="random-author"></span>的文章:<span class="random-title"id="random-title"></span></div></div><div class="random-button-container"><button id="refresh-random-article">刷新</button><button class="random-link-button"id="random-link-button">看看</button></div></div>`;
 
-        randomArticleContainer.innerHTML = statsCard + randomCard;
+        TopContainer.innerHTML = statsCard + randomCard;
 
+        // 绑定事件监听器
         document.getElementById('refresh-random-article').addEventListener('click', function (event) {
             event.preventDefault();
-            displayRandomArticle();
+            updateRandomArticle();
         });
 
         document.getElementById('sort-toggle-btn').addEventListener('click', () => {
@@ -334,6 +293,83 @@ function initialize_fc_lite() {
             container.innerHTML = '';
             loadMoreArticles();
         });
+
+        // 初始化显示第一篇随机文章
+        updateRandomArticle();
+        
+        // 异步检查版本更新，不阻塞主流程
+        Promise.resolve().then(() => {
+            checkVersionUpdate();
+        });
+    }
+
+    // 更新随机文章数据
+    function updateRandomArticle() {
+        const randomArticle = allArticles[Math.floor(Math.random() * allArticles.length)];
+        
+        document.getElementById('random-author').textContent = randomArticle.author;
+        document.getElementById('random-title').textContent = randomArticle.title;
+        document.getElementById('random-link-button').onclick = () => window.open(randomArticle.link, '_blank');
+    }
+
+
+
+    // 异步检查版本更新
+    async function checkVersionUpdate() {
+        const versionText = document.getElementById('version-text');
+        const versionInfo = document.getElementById('version-info');
+        
+        if (!versionText || !versionInfo) {
+            console.warn('版本元素未找到');
+            return;
+        }
+
+        try {
+            // 使用 Promise.all 并行请求，但设置超时避免阻塞
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('请求超时')), 5000)
+            );
+
+            const baseApiUrl = getApiUrl();
+            const VersionApiUrl = baseApiUrl.endsWith('/') ? baseApiUrl + 'version' : baseApiUrl + '/version';
+            const [localVersionResponse, latestVersionResponse] = await Promise.race([
+                Promise.all([
+                    fetch(`${VersionApiUrl}`),
+                    fetch('https://fcircle-doc.yyyzyyyz.cn/version.txt')
+                ]),
+                timeoutPromise
+            ]);
+
+            const localVersionData = await localVersionResponse.json();
+            const latestVersion = await latestVersionResponse.text();
+            const localVersion = localVersionData.version;
+            
+            // 更新版本显示 - 显示时加上v前缀
+            versionText.textContent = `v${localVersion.trim()}`;
+            
+            // 标准化版本号进行比较（都去掉v前缀）
+            const normalizedLocal = localVersion.trim().replace(/^v/, '');
+            const normalizedLatest = latestVersion.trim().replace(/^v/, '');
+            
+            if (normalizedLocal === normalizedLatest) {
+                // 最新版 - 绿色
+                versionText.className = 'version-latest';
+                versionText.title = '当前已为最新版本';
+                versionInfo.textContent = '当前已为最新版本';
+            } else {
+                // 有更新 - 橙色
+                versionText.className = 'version-update';
+                versionText.title = `现有新版本可更新`;
+                versionInfo.textContent = `新版本可用:${latestVersion.trim()}`;
+            }
+        } catch (error) {
+            // 获取失败 - 红色
+            versionText.textContent = 'v0.0.0';
+            versionText.className = 'version-error';
+            versionText.title = '版本信息获取失败';
+            versionInfo.textContent = '版本信息获取失败';
+            console.error('版本检查失败:', error);
+        }
     }
 
     function showAuthorArticles(author, avatar, link) {
@@ -341,14 +377,7 @@ function initialize_fc_lite() {
             const modal = document.createElement('div');
             modal.id = 'modal';
             modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <img id="modal-author-avatar" src="" alt="">
-                    <a id="modal-author-name-link"></a>
-                    <div id="modal-articles-container"></div>
-                    <img id="modal-bg" src="" alt="">
-                </div>
-            `;
+            modal.innerHTML = `<div class="modal-content"><img id="modal-author-avatar"src=""alt=""><a id="modal-author-name-link"></a><div id="modal-articles-container"></div><img id="modal-bg"src=""alt=""></div>`;
             root.appendChild(modal);
         }
 

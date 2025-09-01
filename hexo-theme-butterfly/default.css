@@ -45,84 +45,147 @@
     width: 100%;
 }
 
-#random-article {
+#top-fc-container {
     display: flex;
     position: relative;
     width: 100%;
     margin: 8px 0;
     background-color: var(--container-bg-color);
     border-radius: 10px;
+    overflow: hidden;
     border:1px solid var(--border-color);
     transition: border 0.3s;
     flex-direction: column;
 }
 
-.random-stats-card {
+#top-fc-container:hover {
+    border: 1px solid var(--hover-color);
+}
+
+.stats-card-container {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    background-color: var(--container-bg-color);
+    justify-content: space-between;
     width: 100%;
-    padding: 20px;
 }
 
-.random-stats-info {
-    text-orientation: upright;
+.stats-card-container div {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: SimSun,'Microsoft YaHei',sans-serif;
-    font-size: 35px;
-    font-weight: 1000;
-    color: transparent;
-    -webkit-text-stroke: 1px var(--text-color);
+    align-items: flex-end;
 }
 
-.random-stats-info span {
+.stats-card-left {
+    flex: 1;
+    padding: 20px 0 20px 20px;
+}
+
+.stats-card-left .stats-item {
+    flex-direction: column;
     margin: 0 20px;
+    align-items: center;
+    font-weight: 800;
+    font-size: 34px;
 }
 
-@media screen and (max-width: 800px) {
-    .random-stats-info {
-        font-size: 20px;
+.stats-card-left .stats-item .stats-label {
+    color: var(--author-color);
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.stats-card-right {
+    flex-direction: column;
+}
+
+.stats-card-right .stats-controls {
+    border-radius: 0 10px 0 10px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.stats-card-right .stats-controls button {
+    padding: 5px 20px;
+    border: none;
+    font-size: 14px;
+    transition: all 0.3s;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.stats-card-right .stats-controls button:hover {
+    background-color: #3398db;
+    color: #fff;
+}
+
+.stats-card-right .stats-version {
+    line-height: 1rem;
+    align-items: center;
+    color: #aaaaaa;
+    margin: 10px 0 0 auto;
+    padding: 5px 10px;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 10px 0 0 10px;
+    width:60px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: left;
+    transition: width 0.6s ease;
+}
+
+.stats-card-right .stats-version:hover {
+    width: 200px;
+    min-width: 60px;
+}
+
+.stats-card-right .stats-version #version-text {
+    margin-right: 8px;
+}
+
+#version-text.version-latest {
+    color: #00a023d2;
+}
+
+#version-text.version-update {
+    color: #ff6637d2;
+}
+
+#version-text.version-error {
+    color: #d50000d2;
+}
+
+@media screen and (max-width: 550px) {
+    .stats-card-left .stats-item {
+        margin: 0 10px;
+        font-weight: 700;
+        font-size: 32px;
+    }
+    
+    .stats-card-container {
+        flex-direction: column;
     }
 
-    .random-stats-info span {
-        margin: 0 5px;
+    .stats-card-container div {
+        justify-content: center;
+        align-items: center;
     }
-}
 
-.random-stats-controls {
-    padding: 10px;
-    margin-top: 20px;
-}
+    .stats-card-left {
+        padding: 20px;
+    }
 
-#sort-toggle-btn {
-    font-size: 16px;
-    padding: 5px 10px;
-    margin: 0 5px;
-    border: 1px solid var(--border-color);
-    border-radius: 20px;
-    background-color: var(--container-bg-color);
-    color: var(--text-color);
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-}
+    .stats-card-right .stats-controls {
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
 
-#source-toggle-btn {
-    font-size: 16px;
-    padding: 5px 10px;
-    margin: 0 5px;
-    border: 1px solid var(--border-color);
-    border-radius: 20px;
-    background-color: var(--container-bg-color);
-    color: var(--text-color);
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
+    .stats-card-right .stats-version {
+        display: none;
+    }
 }
 
 .random-container {
-    border-top: 1px dashed #888888;
+    border-top: 1px solid var(--border-color);
     padding: 10px 20px;
     width: 100%;
     height: 60px;
@@ -168,7 +231,7 @@
 #refresh-random-article {
     color: #888888 !important;
     text-decoration: none !important;
-    background-color: #f0f0f0;
+    background-color: var(--background-color);
     width: 50%;
     padding: 5px 10px;
     border: none;
@@ -427,6 +490,7 @@
     max-width: 500px;
     z-index: 9999;
     border-radius: 10px;
+    pointer-events: auto;
     overflow: hidden;
 }
 
