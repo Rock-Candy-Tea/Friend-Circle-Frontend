@@ -56,6 +56,14 @@
 
 ---
 
+## 开发调试
+
+在项目根目录运行：
+```python
+python3 -m http.server 8000
+```
+然后在浏览器中访问：http://localhost:8000即可。
+
 ## 📦 CDN 支持
 
 推荐通过 [jsDelivr](https://www.jsdelivr.com/) CDN 引入资源，全球节点分发，稳定可靠：

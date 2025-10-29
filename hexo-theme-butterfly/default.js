@@ -114,12 +114,16 @@ function initialize_fc_lite() {
             
             const author = document.createElement('div');
             author.className = 'card-author';
+            author.title = article.author;
             const authorImg = document.createElement('img');
             authorImg.className = 'no-lightbox';
             authorImg.src = article.avatar || UserConfig.error_img;
             authorImg.onerror = () => authorImg.src = UserConfig.error_img;
             author.appendChild(authorImg);
-            author.appendChild(document.createTextNode(article.author));
+            const authorName = document.createElement('span');
+            authorName.className = 'card-author-name';
+            authorName.innerText = article.author;
+            author.appendChild(authorName);
             authorContainer.appendChild(author);
             
             const summaryIndicator = document.createElement('div');

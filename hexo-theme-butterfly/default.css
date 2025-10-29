@@ -462,6 +462,10 @@
     display: flex;
     z-index: 1;
     align-items: center;
+    gap: 10px;
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: nowrap;
 }
 
 .summary-indicator {
@@ -469,15 +473,20 @@
     padding: 2px;
     height: 25px;
     width: 25px;
-    margin-left: 10px;
+    min-width: 25px;
     background-color: var(--background-color);
     border: 1px solid var(--border-color);
     border-radius: 50%;
     transition: box-shadow 0.2s;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
 }
 
 .summary-indicator svg {
     fill: var(--text-color);
+    pointer-events: none;
 }
 
 .summary-popup {
@@ -546,9 +555,13 @@
     border-radius: 15px;
     display: flex;
     padding-right: 10px;
-    width: fit-content;
     align-items: center;
     transition: box-shadow 0.2s;
+    flex: 0 1 auto;
+    max-width: 110px;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
 }
 
 #friend-circle-container .card-author img {
@@ -557,6 +570,16 @@
     height: 15px;
     margin: 0 2px !important;
     object-fit: cover;
+    flex-shrink: 0;
+}
+
+.card-author-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    max-width: 70px;
+    flex-shrink: 1;
 }
 
 .card-date {
